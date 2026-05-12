@@ -131,13 +131,13 @@
             width: 100%;
             border-collapse: collapse;
             text-align: left;
-            min-width: 1100px; /* Asegura espacio para todas las columnas */
+            min-width: 1200px; /* Ajustado para nueva columna */
         }
 
         th {
-            padding: 1rem 0.75rem; /* Padding reducido */
+            padding: 0.75rem 0.5rem; /* Padding reducido aún más */
             background: rgba(255, 255, 255, 0.03);
-            font-size: 0.75rem; /* Fuente más pequeña para cabeceras */
+            font-size: 0.7rem; /* Fuente ligeramente más pequeña */
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: var(--text-dim);
@@ -187,9 +187,9 @@
         }
 
         td {
-            padding: 1rem 0.75rem;
+            padding: 0.75rem 0.5rem; /* Padding reducido */
             border-bottom: 1px solid var(--border);
-            font-size: 0.85rem; /* Fuente un poco más pequeña */
+            font-size: 0.8rem; /* Fuente ligeramente más pequeña */
         }
 
         tr:last-child td {
@@ -295,7 +295,7 @@
             <table id="resultsTable">
                 <thead>
                     <tr class="filter-header-row">
-                        <th></th> <!-- Nombre -->
+                        <th></th> <!-- Categoría -->
                         <th></th> <!-- Estado -->
                         <th>
                             <div class="filter-input-wrapper">
@@ -321,25 +321,26 @@
                                 <input type="text" id="minTVL" value="10.000" placeholder="Ej: 10.000">
                             </div>
                         </th>
-                        <th></th> <!-- CG -->
-                        <th></th> <!-- CMC -->
-                        <th></th> <!-- Link -->
+                        <th></th> <!-- Website -->
+                        <th></th> <!-- X (Twitter) -->
+                        <th></th> <!-- Info -->
                     </tr>
                     <tr>
                         <th>Nombre</th>
+                        <th>Categoría</th>
                         <th>Estado</th>
                         <th>Cambio 24h</th>
                         <th>Market Cap</th>
                         <th>FDV</th>
                         <th>TVL</th>
-                        <th>CoinGecko</th>
-                        <th>CoinMarketCap</th>
-                        <th>DefiLlama</th>
+                        <th>Website</th>
+                        <th>X (Twitter)</th>
+                        <th>Info</th>
                     </tr>
                 </thead>
                 <tbody id="resultsBody">
                     <tr>
-                        <td colspan="9" style="text-align: center; padding: 4rem; color: var(--text-dim);">
+                        <td colspan="10" style="text-align: center; padding: 4rem; color: var(--text-dim);">
                             Presiona "Escanear Mercado" para comenzar con los filtros aplicados.
                         </td>
                     </tr>
@@ -388,6 +389,9 @@
                         tvl: p.tvl || 0,
                         icon: p.logo || `https://icons.llamao.fi/icons/coins/unknown.png`,
                         category: p.category || 'DeFi',
+                        subcategory: (p.tags && p.tags.length > 0) ? p.tags[0] : '',
+                        website: p.url || '',
+                        twitter: p.twitter || '',
                         source: 'DefiLlama'
                     }));
                 }
@@ -418,7 +422,7 @@
             resultsBody.innerHTML = '';
             
             if (gems.length === 0) {
-                resultsBody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 4rem; color: var(--text-dim);">No se encontraron gemas con estos criterios. Prueba ajustando los filtros superiores.</td></tr>';
+                resultsBody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 4rem; color: var(--text-dim);">No se encontraron gemas con estos criterios. Prueba ajustando los filtros superiores.</td></tr>';
                 resultCountText.innerText = '0 encontrados';
                 return;
             }
@@ -444,10 +448,13 @@
                             <img src="${gem.icon}" class="coin-icon" onerror="this.src='https://via.placeholder.com/32?text=${gem.symbol.charAt(0)}'">
                             <div>
                                 <div>${gem.name}</div>
-                                <div style="font-size: 0.7rem; color: var(--text-dim); font-weight: 400;">${gem.category}</div>
+                                <div style="font-size: 0.7rem; color: var(--text-dim); font-weight: 400;">${gem.symbol}</div>
                             </div>
-                            <span class="symbol">${gem.symbol}</span>
                         </div>
+                    </td>
+                    <td>
+                        <div style="font-weight: 600;">${gem.category}</div>
+                        ${gem.subcategory ? `<div style="font-size: 0.7rem; color: var(--text-dim);">${gem.subcategory}</div>` : ''}
                     </td>
                     <td><span style="color: var(--primary); font-size: 0.8rem; font-weight: 600;">Activo</span></td>
                     <td class="${changeClass}">${gem.change24h > 0 ? '+' : ''}${gem.change24h.toFixed(2)}% <br><small style="font-size: 0.6rem; font-weight: 400; color: var(--text-dim);">TVL Growth</small></td>
@@ -455,21 +462,32 @@
                     <td>${formatCurrency(gem.fdv)} <br><small style="font-size: 0.6rem; font-weight: 400; color: var(--text-dim);">Est.</small></td>
                     <td>${formatCurrency(gem.tvl)}</td>
                     <td>
-                        ${geckoUrl ? `
-                        <a href="${geckoUrl}" target="_blank" style="${btnStyle} color: #8cc63f; background: rgba(140, 198, 63, 0.1); border: 1px solid rgba(140, 198, 63, 0.2);">
-                            CoinGecko
+                        ${gem.website ? `
+                        <a href="${gem.website}" target="_blank" style="${btnStyle} color: var(--text-main); background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border);">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                            Sitio
                         </a>` : '<span style="color: var(--text-dim); font-size: 0.7rem;">-</span>'}
                     </td>
                     <td>
-                        ${cmcUrl ? `
-                        <a href="${cmcUrl}" target="_blank" style="${btnStyle} color: #3861fb; background: rgba(56, 97, 251, 0.1); border: 1px solid rgba(56, 97, 251, 0.2);">
-                            CoinMarketCap
+                        ${gem.twitter ? `
+                        <a href="https://x.com/${gem.twitter}" target="_blank" style="${btnStyle} color: #1DA1F2; background: rgba(29, 161, 242, 0.1); border: 1px solid rgba(29, 161, 242, 0.2);">
+                            @${gem.twitter}
                         </a>` : '<span style="color: var(--text-dim); font-size: 0.7rem;">-</span>'}
                     </td>
                     <td>
-                        <a href="${llamaUrl}" target="_blank" style="${btnStyle} color: var(--secondary); background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2);">
-                            DefiLlama
-                        </a>
+                        <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                            ${geckoUrl ? `
+                            <a href="${geckoUrl}" target="_blank" title="CoinGecko" style="${btnStyle} padding: 4px; color: #8cc63f; background: rgba(140, 198, 63, 0.1); border: 1px solid rgba(140, 198, 63, 0.2);">
+                                <img src="https://www.coingecko.com/favicon.ico" width="16" height="16" alt="CG">
+                            </a>` : ''}
+                            ${cmcUrl ? `
+                            <a href="${cmcUrl}" target="_blank" title="CoinMarketCap" style="${btnStyle} padding: 4px; color: #3861fb; background: rgba(56, 97, 251, 0.1); border: 1px solid rgba(56, 97, 251, 0.2);">
+                                <img src="https://coinmarketcap.com/favicon.ico" width="16" height="16" alt="CMC">
+                            </a>` : ''}
+                            <a href="${llamaUrl}" target="_blank" title="DefiLlama" style="${btnStyle} padding: 4px; color: var(--secondary); background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2);">
+                                <img src="https://defillama.com/favicon.ico" width="16" height="16" alt="DL">
+                            </a>
+                        </div>
                     </td>
                 `;
                 resultsBody.appendChild(tr);
@@ -488,7 +506,7 @@
 
             scanBtn.disabled = true;
             statusBar.style.display = 'block';
-            resultsBody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 4rem;"><div class="spinner">Escaneando protocolos en DefiLlama...</div></td></tr>';
+            resultsBody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 4rem;"><div class="spinner">Escaneando protocolos en DefiLlama...</div></td></tr>';
 
             const dlGems = await fetchDefiLlama(maxMC, maxFDV, minChange, minTVL);
 
